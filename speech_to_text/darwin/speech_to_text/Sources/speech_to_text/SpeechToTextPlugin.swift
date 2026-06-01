@@ -114,8 +114,7 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
     // FlutterStandardMethodCodec.sharedInstance() puede devolver nil desde
     // el convenience init interno de FlutterMethodChannel, causando
     // EXC_BAD_ACCESS en swift_getObjectType durante el register.
-    let codec = FlutterStandardMethodCodec.sharedInstance() as FlutterMethodCodec?
-    let safeCodec: FlutterMethodCodec = codec ?? FlutterStandardMethodCodec()
+    let safeCodec = FlutterStandardMethodCodec.sharedInstance() ?? FlutterStandardMethodCodec()
 
     var channel: FlutterMethodChannel
     #if os(OSX)
