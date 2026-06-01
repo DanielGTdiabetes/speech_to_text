@@ -110,15 +110,24 @@ public class SpeechToTextPlugin: NSObject, FlutterPlugin {
   private let pluginLog = OSLog(subsystem: "com.csdcorp.speechToText", category: "plugin")
 
   public static func register(with registrar: FlutterPluginRegistrar) {
+    // Fix: pasar codec explícito con fallback. En iOS 26 + Flutter 3.32,
+    // FlutterStandardMethodCodec.sharedInstance() puede devolver nil desde
+    // el convenience init interno de FlutterMethodChannel, causando
+    // EXC_BAD_ACCESS en swift_getObjectType durante el register.
+    let codec = FlutterStandardMethodCodec.sharedInstance() as FlutterMethodCodec?
+    let safeCodec: FlutterMethodCodec = codec ?? FlutterStandardMethodCodec()
 
     var channel: FlutterMethodChannel
     #if os(OSX)
       channel = FlutterMethodChannel(
-        name: "plugin.csdcorp.com/speech_to_text", binaryMessenger: registrar.messenger)
+        name: "plugin.csdcorp.com/speech_to_text",
+        binaryMessenger: registrar.messenger,
+        codec: safeCodec)
     #else
       channel = FlutterMethodChannel(
-        name: "plugin.csdcorp.com/speech_to_text", binaryMessenger: registrar.messenger())
-
+        name: "plugin.csdcorp.com/speech_to_text",
+        binaryMessenger: registrar.messenger(),
+        codec: safeCodec)
     #endif
 
     let instance = SpeechToTextPlugin(channel, registrar: registrar)
